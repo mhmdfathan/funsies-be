@@ -17,6 +17,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Session   string    `json:"session"`
+	IsActive  bool 		`gorm:"default:false" json:"is_active"`
 	Otp		  string 	`json:"otp"`
 
 	//foreign key - reviews
@@ -25,5 +26,6 @@ type User struct {
 	//foreign key - comments
 	Comments []Comment `gorm:"foreignKey:UserID"`
 
-
+	//foreign key - activation tokens
+	ActivationTokens []ActivationToken `gorm:"foreignKey:UserID"`
 }

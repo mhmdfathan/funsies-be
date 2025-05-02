@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/mhmdfathan/funsies-be/models/db-models"
 	"github.com/joho/godotenv"
+	dbmodels "github.com/mhmdfathan/funsies-be/models/db-models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -37,7 +37,7 @@ func DatabaseInit() {
 
 	if DB != nil {
 		fmt.Println("migrating models..")
-		errMigrate := DB.AutoMigrate(&dbmodels.User{}, &dbmodels.Review{}, &dbmodels.Reply{}, &dbmodels.FollowingFollowed{}, &dbmodels.Destination{}, &dbmodels.Comment{})
+		errMigrate := DB.AutoMigrate(&dbmodels.User{}, &dbmodels.Review{}, &dbmodels.Reply{}, &dbmodels.FollowingFollowed{}, &dbmodels.Destination{}, &dbmodels.Comment{}, &dbmodels.ActivationToken{})
 		if errMigrate != nil {
 			fmt.Println("Error migrating models to database")
 		} else {
