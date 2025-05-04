@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofrs/uuid"
@@ -74,24 +75,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	insertNewUser := config.DB.Create(&newUserData)
 	if insertNewUser.Error != nil || insertNewUser.RowsAffected == 0 {
-		//
-		if insertNewUser.Error.Error() == "ERROR: duplicate key value violates unique constraint \"uni_users_email\" (SQLSTATE 23505)" {
+		//email or username already exists
+		if insertNewUser.Error.Error() == "ERROR: duplicate key value violates unique constraint \"uni_users_email\" (SQLSTATE 23505)" || insertNewUser.Error.Error() == "ERROR: duplicate key value violates unique constraint \"uni_users_username\" (SQLSTATE 23505)" {	
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]interface{}{
-				"message": "Email already exists",
+				"message": "Email or/and username already exists",
 			})
 			return
 		}
 
-		if insertNewUser.Error.Error() == "ERROR: duplicate key value violates unique constraint \"uni_users_username\" (SQLSTATE 23505)" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"message": "Username already exists",
-			})
-			return
-		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -102,11 +95,41 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 
 	//add token to activation token - not yet implemented
-	//send email to activate - not yet implemented
-		// response
+	activationToken := utils.GenerateActivationToken(32)
+
+	tokenId, err := uuid.NewV7()
+	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Registration successful",
+			"message": "Registration failed",
 		})
+		return
+	}
+
+	token := dbmodels.ActivationToken{
+		ID: tokenId.String(),
+		UserID:    userId.String(),
+		Token:     activationToken,
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+	}
+
+	createActivationToken := config.DB.Create(&token)
+	if createActivationToken.Error != nil || createActivationToken.RowsAffected == 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Registration failed",
+		})
+		return
+	}
+	
+
+	//send email to activate - not yet implemented
+	// response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Registration successful",
+	})
 }
