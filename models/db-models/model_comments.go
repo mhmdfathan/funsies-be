@@ -5,14 +5,14 @@ type Comment struct {
 
 	//foreign key - from reviews
 	ReviewID string `gorm:"type:uuid" json:"review_id"`
-	Review   Review `gorm:"foreignKey:ReviewID;references:ID"`
+	Review   Review `gorm:"foreignKey:ReviewID;references:ID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 
 	//foreign key - from users
 	UserID string `gorm:"type:uuid" json:"user_id"`
-	User   User   `gorm:"foreignKey:UserID;references:ID"`
+	User   User   `gorm:"foreignKey:UserID;references:ID;constraint:OnDelete:CASCADE,OnUpdate:CASCADE"`
 
 	Comment string `json:"comment"`
 
 	//foreign key - replies
-	Replies []Reply `gorm:"foreignKey:CommentID"`
+	// Replies []Reply `gorm:"foreignKey:CommentID"`
 }

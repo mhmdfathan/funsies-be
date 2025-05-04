@@ -8,5 +8,5 @@ type Destination struct {
 	Latitude  string   `json:"latitude"`
 
 	//foreign key - reviews
-	Reviews   []Review `gorm:"foreignKey:DestinationID"`
+	// Reviews   []Review `gorm:"foreignKey:DestinationID"`
 }

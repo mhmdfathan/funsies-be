@@ -20,12 +20,12 @@ type User struct {
 	IsActive  bool 		`gorm:"default:false" json:"is_active"`
 	Otp		  string 	`json:"otp"`
 
-	//foreign key - reviews
-	Reviews []Review 	`gorm:"foreignKey:UserID"`
+	// //foreign key - reviews
+	// Reviews []Review 	`gorm:"foreignKey:UserID"`
 
-	//foreign key - comments
-	Comments []Comment `gorm:"foreignKey:UserID"`
+	// //foreign key - comments
+	// Comments []Comment `gorm:"foreignKey:UserID"`
 
-	//foreign key - activation tokens
-	ActivationTokens []ActivationToken `gorm:"foreignKey:UserID"`
+	// //foreign key - activation tokens
+	// ActivationTokens []ActivationToken `gorm:"foreignKey:UserID"`
 }
