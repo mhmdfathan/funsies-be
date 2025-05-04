@@ -10,5 +10,5 @@ type RequestRegister struct {
 	FirstName string `json:"first_name" validate:"required"`
 	LastName  string `json:"last_name" validate:"required"`
 	BirthDate time.Time `json:"birth_date" validate:"required"`
-	Gender bool `json:"gender" validate:"required"`
+	Gender 		uint8 `json:"gender" validate:"required,number"`
 }

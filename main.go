@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mhmdfathan/funsies-be/config"
+	"github.com/mhmdfathan/funsies-be/routes"
 )
 
 func main() {
@@ -18,6 +19,9 @@ func main() {
 	  return
 	}
 	config.DatabaseInit()
+
+	//routes
+	routes.UserRoutes(httpServer)
 
 	fmt.Println("Memoraire backend is listening at port:", os.Getenv("APP_PORT"))
 	http.ListenAndServe(":" + os.Getenv("APP_PORT"), httpServer)

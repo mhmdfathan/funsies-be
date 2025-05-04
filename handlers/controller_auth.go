@@ -26,13 +26,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	//validate request
 	validate := validator.New()
-	err = validate.Struct(registerRequest)
 	validate.RegisterValidation("phoneval", utils.ValidatePhone)
+	err = validate.Struct(registerRequest)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Registration failed",
+			"message": "Registration failed vl",
+			"error": err.Error(),
 		})
 		return
 	}

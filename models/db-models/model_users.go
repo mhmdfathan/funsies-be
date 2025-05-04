@@ -13,7 +13,7 @@ type User struct {
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
  	BirthDate time.Time `json:"birth_date"`
-	Gender    bool      `json:"gender"`
+	Gender    uint8     `json:"gender"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Session   string    `json:"session"`
