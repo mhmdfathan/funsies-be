@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mhmdfathan/funsies-be/config"
 	"github.com/mhmdfathan/funsies-be/routes"
+	"github.com/mhmdfathan/funsies-be/utils"
 )
 
 func main() {
@@ -18,7 +19,12 @@ func main() {
 	  log.Fatal("Error loading .env file")
 	  return
 	}
+
+	//database
 	config.DatabaseInit()
+
+	//cron for checking pending users
+	utils.StartCron(config.DB)
 
 	//routes
 	routes.UserRoutes(httpServer)
