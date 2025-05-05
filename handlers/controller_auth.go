@@ -133,3 +133,90 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		"message": "Registration successful",
 	})
 }
+
+func ActivateAccount (w http.ResponseWriter, r *http.Request) {
+	//request query
+	activationTokenRequest := r.URL.Query().Get("activation")
+	if activationTokenRequest == "" {
+		http.Error(w, "Activation token is required", http.StatusBadRequest)
+		return
+	}
+
+	//find pending user
+	var existingPendingUser requests.PendingUser
+	result := config.DB.Raw(`
+		SELECT users.id, users.is_active, activation_tokens.token, activation_tokens.expires_at
+		FROM activation_tokens
+		JOIN users ON activation_tokens.user_id = users.id
+		WHERE activation_tokens.token = ?
+		LIMIT 1
+	`, activationTokenRequest).Scan(&existingPendingUser)
+
+	if result.Error != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Activation failed",
+		})
+		return
+	}
+
+	//if there's no pending user
+	if existingPendingUser.ID == "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "User doesn't exist",
+		})
+		return
+	}
+
+	//if the token already expired and user's account is not yet activated
+	if existingPendingUser.ExpiresAt.Before(time.Now()) && !existingPendingUser.IsActive {
+		deletePendingUser := config.DB.Where("id = ?", existingPendingUser.ID).Delete(&dbmodels.User{})
+
+		if deletePendingUser.Error != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "Internal server error",
+			})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Activation code already expired, please re-register",
+		})
+		return
+	}
+
+	//activate
+	activateUser := config.DB.Model(&dbmodels.User{}).Where("id = ?", existingPendingUser.ID).Update("is_active", true)
+	if activateUser.Error != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Internal server error",
+		})
+		return
+	}
+
+	//delete token
+	deleteToken := config.DB.Where("token = ?", existingPendingUser.Token).Delete(dbmodels.ActivationToken{})
+
+	if deleteToken.Error != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Internal server error",
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "User activation successful",
+	})
+}

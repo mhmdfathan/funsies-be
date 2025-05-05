@@ -12,3 +12,10 @@ type RequestRegister struct {
 	BirthDate time.Time `json:"birth_date" validate:"required"`
 	Gender 		uint8 `json:"gender" validate:"required,number"`
 }
+
+type PendingUser struct {
+	ID 			string
+	IsActive 	bool
+	Token 		string
+	ExpiresAt	time.Time
+}
